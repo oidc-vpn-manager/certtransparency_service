@@ -1,0 +1,354 @@
+openapi: 3.0.0
+info:
+  title: OpenVPN Manager Certificate Transparency API
+  description: |
+    API for the OpenVPN Manager Certificate Transparency service.
+    
+    This service provides an immutable audit log of all certificate operations
+    including issuance and revocation. It supports both public read access
+    for audit purposes and authenticated write access for certificate logging.
+    
+    **Access Patterns**:
+    - Public read access: Certificate searches, statistics, individual certificate lookups
+    - Authenticated write access: Certificate logging, revocation (signing service only)
+    
+    **Data Integrity**: All certificate operations are logged with timestamps
+    and cannot be modified once recorded, ensuring audit trail integrity.
+  version: "1.0.0"
+  contact:
+    email: jon+openvpnmanagersecurity@sprig.gs
+  license:
+    name: AGPL v3
+    url: https://www.gnu.org/licenses/agpl-3.0.html
+servers:
+  - url: /
+    description: Certificate Transparency service
+paths:
+  /certificates:
+    get:
+      summary: List certificates with filtering and pagination
+      description: |
+        Retrieve a paginated list of certificates from the transparency log
+        with optional filtering by various certificate attributes.
+        
+        This endpoint supports comprehensive filtering options including
+        certificate type, subject/issuer matching, date ranges, and revocation status.
+      tags:
+        - Certificate Lookup
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 100
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [client, server, intermediate]
+        - name: subject
+          in: query
+          schema:
+            type: string
+        - name: issuer
+          in: query
+          schema:
+            type: string
+        - name: serial
+          in: query
+          schema:
+            type: string
+        - name: fingerprint
+          in: query
+          schema:
+            type: string
+        - name: from_date
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: to_date
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: include_revoked
+          in: query
+          schema:
+            type: boolean
+            default: true
+        - name: include_pem
+          in: query
+          schema:
+            type: boolean
+            default: false
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum: [issued_at, not_before, not_after, subject_common_name]
+            default: issued_at
+        - name: order
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+      responses:
+        '200':
+          description: A list of certificates.
+    post:
+      summary: Log a new certificate.
+      description: Log a new certificate to the Certificate Transparency service.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                certificate_pem:
+                  type: string
+                certificate_type:
+                  type: string
+                  enum: [client, server, intermediate]
+                certificate_purpose:
+                  type: string
+                requester_info:
+                  type: object
+                issuing_user_id:
+                  type: string
+      responses:
+        '201':
+          description: Certificate logged successfully.
+  /certificates/{fingerprint}:
+    get:
+      summary: Get a certificate by fingerprint.
+      parameters:
+        - name: fingerprint
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: include_pem
+          in: query
+          schema:
+            type: boolean
+            default: true
+      responses:
+        '200':
+          description: A single certificate.
+  /certificates/{fingerprint}/revoke:
+    post:
+      summary: Revoke a certificate.
+      parameters:
+        - name: fingerprint
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+                revoked_at:
+                  type: string
+                  format: date-time
+                revoked_by:
+                  type: string
+      responses:
+        '200':
+          description: Certificate revoked successfully.
+  /certificates/serial/{serial_number}:
+    get:
+      summary: Get a certificate by serial number.
+      parameters:
+        - name: serial_number
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: include_pem
+          in: query
+          schema:
+            type: boolean
+            default: true
+      responses:
+        '200':
+          description: A single certificate.
+  /certificates/subject/{common_name}:
+    get:
+      summary: Get certificates by subject common name.
+      parameters:
+        - name: common_name
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: include_pem
+          in: query
+          schema:
+            type: boolean
+            default: false
+        - name: include_revoked
+          in: query
+          schema:
+            type: boolean
+            default: true
+      responses:
+        '200':
+          description: A list of certificates.
+  /statistics:
+    get:
+      summary: Get certificate statistics.
+      responses:
+        '200':
+          description: A summary of certificate statistics.
+  /search:
+    get:
+      summary: Search for certificates.
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: exact
+          in: query
+          schema:
+            type: boolean
+            default: false
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 100
+        - name: include_pem
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: A list of certificates matching the search query.
+  /users/{user_id}/revoke-certificates:
+    post:
+      summary: Bulk revoke certificates for a user.
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+                revoked_by:
+                  type: string
+                revoked_at:
+                  type: string
+                  format: date-time
+      responses:
+        '200':
+          description: Certificates revoked successfully.
+
+components:
+  securitySchemes:
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Secret
+      description: |
+        API secret for write operations from signing service.
+        Only the signing service is authorized to log certificates and revocations.
+  
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Human-readable error message
+          example: "Certificate not found"
+      required:
+        - error
+      description: Standard error response format
+
+    Certificate:
+      type: object
+      properties:
+        fingerprint:
+          type: string
+          description: SHA-256 fingerprint of the certificate
+          example: "a1:b2:c3:d4:e5:f6:..."
+        serial_number:
+          type: string
+          description: Certificate serial number
+          example: "1234567890"
+        subject_common_name:
+          type: string
+          description: Certificate subject common name
+          example: "user123"
+        issuer_common_name:
+          type: string
+          description: Certificate issuer common name
+          example: "OpenVPN Manager Intermediate CA"
+        certificate_type:
+          type: string
+          enum: [client, server, intermediate]
+          example: "client"
+        not_before:
+          type: string
+          format: date-time
+          description: Certificate validity start date
+          example: "2025-09-04T12:00:00Z"
+        not_after:
+          type: string
+          format: date-time
+          description: Certificate validity end date
+          example: "2026-09-04T12:00:00Z"
+        issued_at:
+          type: string
+          format: date-time
+          description: Certificate issuance timestamp
+          example: "2025-09-04T12:00:00Z"
+        is_revoked:
+          type: boolean
+          description: Whether the certificate has been revoked
+          example: false
+        revoked_at:
+          type: string
+          format: date-time
+          description: Certificate revocation timestamp (if revoked)
+          example: null
+        certificate_pem:
+          type: string
+          description: PEM-encoded certificate (only when include_pem=true)
+          example: "-----BEGIN CERTIFICATE-----\n..."
+
+tags:
+  - name: Certificate Lookup
+    description: |
+      Public read-only endpoints for searching and retrieving certificate information
+      from the transparency log. No authentication required.
+  
+  - name: Certificate Logging
+    description: |
+      Authenticated endpoints for logging new certificates and revocations.
+      Only accessible by the signing service with valid API secret.

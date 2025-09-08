@@ -1,0 +1,11 @@
+Flask
+Flask-SQLAlchemy
+Flask-Migrate
+cryptography
+gunicorn
+psycopg2-binary
+requests
+PyJWT
+flask-swagger-ui
+PyYAML
+geoip2
