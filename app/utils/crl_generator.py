@@ -65,7 +65,7 @@ class CRLGenerator:
                 password=ca_key_passphrase.encode('utf-8') if ca_key_passphrase else None
             )
             
-        except Exception as e:  # pragma: no cover
+        except Exception as e:
             raise ValueError(f"Invalid CA certificate or key: {str(e)}")
     
     def _load_ca_materials_from_files(self):
@@ -93,9 +93,8 @@ class CRLGenerator:
             if ca_cert_pem and ca_key_pem:
                 self.load_ca_materials(ca_cert_pem, ca_key_pem, passphrase)
                 
-        except Exception as e:  # pragma: no cover
-            # Don't fail initialization if CA materials can't be loaded from files
-            # They can be loaded later via load_ca_materials()
+        except Exception as e: # pragma: no cover
+            ## PRAGMA-NO-COVER Exception; JS 2025-09-03 Filesystem Exception requires FS bug to test.
             pass
     
     def create_crl(self, revoked_certificates: List, next_update_hours: int = 24) -> bytes:

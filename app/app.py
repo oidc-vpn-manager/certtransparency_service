@@ -74,14 +74,8 @@ def create_app(config_class=None):
     def swagger_spec():
         return send_from_directory(os.path.dirname(os.path.abspath(__file__)), 'swagger.yaml')
     
-    # Configure logging
-    if not app.debug and not app.testing:
-        if app.config.get('LOG_TO_STDOUT'):
-            stream_handler = logging.StreamHandler()
-            stream_handler.setLevel(logging.INFO)
-            app.logger.addHandler(stream_handler)
-        
-        app.logger.setLevel(logging.INFO)
-        app.logger.info('Certificate Transparency Service startup')
+    # Configure structured security logging
+    from app.utils.logging_config import configure_security_logging
+    configure_security_logging(app)
     
     return app

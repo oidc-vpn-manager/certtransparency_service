@@ -8,7 +8,7 @@ for certificate issuance.
 
 import json
 from datetime import datetime, timezone
-from sqlalchemy import Column, Integer, String, Text, DateTime, Index
+from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean, Index
 from cryptography import x509
 from cryptography.hazmat.primitives import serialization, hashes
 
@@ -47,6 +47,14 @@ class CertificateLog(db.Model):
     requester_country = Column(String(2), nullable=True, index=True)  # ISO country code
     requester_user_agent = Column(Text, nullable=True)  # Full user agent string
     requester_os = Column(String(50), nullable=True)  # Detected OS from user agent
+
+    # Extended requester metadata (from frontend request details)
+    user_email = Column(String(255), nullable=True)  # User email from OIDC
+    os_version = Column(String(50), nullable=True)  # OS version details
+    browser = Column(String(50), nullable=True)  # Browser name
+    browser_version = Column(String(50), nullable=True)  # Browser version
+    is_mobile = Column(Boolean, nullable=True)  # Mobile device detection
+    request_timestamp = Column(DateTime(timezone=True), nullable=True)  # Original request timestamp from frontend
     
     # Certificate details
     subject_common_name = Column(String(255), nullable=False, index=True)
@@ -277,7 +285,26 @@ class CertificateLog(db.Model):
         
         # Add user tracking information
         data['issuing_user_id'] = self.issuing_user_id
-        
+
+        # Add requester metadata for audit trail
+        data['requester_info'] = {
+            'ip': self.requester_ip,
+            'country': self.requester_country,
+            'user_agent': self.requester_user_agent,
+            'os': self.requester_os,
+        }
+
+        # Add additional metadata if available via dynamic attributes
+        extra_metadata = {}
+        for attr in ['user_email', 'os_version', 'browser', 'browser_version', 'is_mobile', 'request_timestamp']:
+            if hasattr(self, attr):
+                value = getattr(self, attr)
+                if value is not None:
+                    extra_metadata[attr] = value
+
+        if extra_metadata:
+            data['requester_info'].update(extra_metadata)
+
         # Add append-only CT fields
         data['action_type'] = self.action_type
         data['log_timestamp'] = self.log_timestamp.isoformat() if self.log_timestamp else None

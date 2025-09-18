@@ -17,8 +17,7 @@ from app.utils.geoip import (
     GEOIP_DATABASE_ENV_VAR
 )
 
-# Configure logging for tests
-logging.basicConfig(level=logging.DEBUG)
+# Note: logging configuration handled by caplog fixture
 
 @pytest.fixture(autouse=True)
 def configure_logging(caplog):

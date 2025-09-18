@@ -26,24 +26,18 @@ def test_create_app_with_none_config_class():
 
 
 def test_create_app_logging_configuration_not_debug_not_testing():
-    """Test create_app logging configuration when not debug and not testing - lines 50-56."""
+    """Test create_app logging configuration when not debug and not testing."""
     # Use a real config but disable debug and testing
     config = UnitTestConfig()
     config.DEBUG = False
     config.TESTING = False
     config.LOG_TO_STDOUT = True
-    
-    with patch('app.app.logging') as mock_logging:
-        mock_stream_handler = MagicMock()
-        mock_stream_handler.level = logging.INFO  # Set handler level properly
-        mock_logging.StreamHandler.return_value = mock_stream_handler
-        mock_logging.INFO = logging.INFO  # Use real logging level
-        
+
+    with patch('app.utils.logging_config.setup_logging') as mock_setup_logging:
         app = create_app(config_class=config)
-        
-        # Verify StreamHandler was created and configured
-        mock_logging.StreamHandler.assert_called_once()
-        mock_stream_handler.setLevel.assert_called_once_with(logging.INFO)
+
+        # Verify custom logging setup was called (since TESTING=False)
+        mock_setup_logging.assert_called_once_with(app.config)
 
 
 def test_create_app_logging_with_log_to_stdout_false():

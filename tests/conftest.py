@@ -16,6 +16,7 @@ os.environ.setdefault('CT_SERVICE_API_SECRET', 'test-secret-key')
 
 import pytest
 import tempfile
+import logging
 from datetime import datetime, timezone
 
 # Add certtransparency_service to the Python path for testing
@@ -149,3 +150,34 @@ PvEH
         'certificate_purpose': 'test-server-profile',
         'request_source': 'signing_service'
     }
+
+
+@pytest.fixture(autouse=True)
+def configure_logging_for_tests():
+    """Configure logging for tests to ensure caplog works properly."""
+
+    yield  # Let the test run first
+
+    # After each test, reset logging configuration to ensure caplog works
+    # Clear all existing handlers from all loggers
+    loggers_to_clear = [
+        logging.getLogger(),  # Root logger
+        logging.getLogger('app.utils.geoip'),
+        logging.getLogger('security_events'),
+        logging.getLogger('flask.app'),
+        logging.getLogger('gunicorn.access'),
+        logging.getLogger('gunicorn.error'),
+        logging.getLogger('app'),
+        logging.getLogger('werkzeug')
+    ]
+
+    for logger in loggers_to_clear:
+        logger.handlers.clear()
+        logger.setLevel(logging.NOTSET)
+        logger.propagate = True
+
+    # Reset logging configuration completely
+    logging.shutdown()
+
+    # Reinitialize basic logging for next test
+    logging.basicConfig(level=logging.DEBUG, format='%(message)s', force=True)

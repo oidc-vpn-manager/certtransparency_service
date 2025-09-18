@@ -617,15 +617,73 @@ vNY3M/KqQv2zV8CcmXrWXg8kcK1vXY4dZJhHhj4VqRZbFxzHdR9hNl8pKqR3
                 sample_cert_data['certificate_pem'],
                 sample_cert_data['certificate_type']
             )
-            
+
             # Test with invalid to_date - should trigger ValueError exception and pass silently
             filters = {
                 'to_date': 'not-a-valid-date'  # This will cause ValueError in datetime.fromisoformat
             }
-            
+
             # The method should handle the ValueError and continue without the date filter
             certificates_data, total_count = CertificateLog.get_latest_certificates(filters=filters)
-            
+
             # Should return results (not crash) - invalid date filter is ignored
             assert total_count >= 1
             assert len(certificates_data) >= 1
+
+    def test_to_dict_with_extra_metadata_attributes(self, app, sample_cert_data):
+        """Test to_dict with extra metadata attributes - lines 303, 306."""
+        with app.app_context():
+            log_entry = CertificateLog(
+                sample_cert_data['certificate_pem'],
+                sample_cert_data['certificate_type']
+            )
+
+            # Manually set extra metadata attributes that would trigger lines 303, 306
+            log_entry.user_email = 'test@example.com'
+            log_entry.os_version = 'Windows 10'
+            log_entry.browser = 'Chrome'
+            log_entry.browser_version = '91.0.4472.124'
+            log_entry.is_mobile = False
+            log_entry.request_timestamp = datetime.now(timezone.utc)
+
+            # Also set an attribute to None to test the conditional
+            log_entry.user_agent = None  # This should not be included in extra_metadata
+
+            result = log_entry.to_dict()
+
+            # Verify that extra metadata attributes are included in requester_info
+            assert 'requester_info' in result
+            requester_info = result['requester_info']
+
+            # These should be added via lines 303, 306
+            assert requester_info['user_email'] == 'test@example.com'
+            assert requester_info['os_version'] == 'Windows 10'
+            assert requester_info['browser'] == 'Chrome'
+            assert requester_info['browser_version'] == '91.0.4472.124'
+            assert requester_info['is_mobile'] is False
+            assert 'request_timestamp' in requester_info
+
+            # user_agent should still be None in base requester_info (not overwritten by extra_metadata)
+            assert requester_info['user_agent'] is None
+
+    def test_to_dict_without_extra_metadata_attributes(self, app, sample_cert_data):
+        """Test to_dict without extra metadata attributes to ensure lines 303, 306 are not reached."""
+        with app.app_context():
+            log_entry = CertificateLog(
+                sample_cert_data['certificate_pem'],
+                sample_cert_data['certificate_type']
+            )
+
+            # Ensure none of the extra metadata attributes are set
+            # Note: We don't need to explicitly delete them since they weren't set in the first place
+            # The test is to verify that these attributes don't exist, so lines 303, 306 are not reached
+
+            result = log_entry.to_dict()
+
+            # Verify that basic requester_info is still present
+            assert 'requester_info' in result
+            requester_info = result['requester_info']
+
+            # Should only have the basic fields, no extra metadata
+            expected_keys = {'ip', 'country', 'user_agent', 'os'}
+            assert set(requester_info.keys()) == expected_keys

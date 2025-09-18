@@ -36,8 +36,9 @@ def api_secret_required(f):
                 'error': 'Authentication service not configured'
             }), 500
         
-        # Verify the provided secret matches the expected secret
-        if provided_secret != expected_secret:
+        # Verify the provided secret matches the expected secret using constant-time comparison
+        import hmac
+        if not hmac.compare_digest(provided_secret.encode('utf-8'), expected_secret.encode('utf-8')):
             current_app.logger.warning(
                 f"API authentication failed - invalid secret provided from {request.remote_addr}"
             )

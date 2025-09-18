@@ -42,16 +42,18 @@ def list_certificates():
     Returns:
         JSON response with certificate list and pagination metadata
     """
-    # Parse pagination parameters
-    page = request.args.get('page', 1, type=int)
-    limit = min(request.args.get('limit', 100, type=int), 1000)  # Cap at 1000
+    # Parse pagination parameters with security validation
+    page = max(1, request.args.get('page', 1, type=int))  # Ensure page >= 1
+    limit = request.args.get('limit', 100, type=int)
+    limit = max(1, min(limit, 1000))  # Ensure 1 <= limit <= 1000
     
-    # Parse filtering parameters
-    cert_type = request.args.get('type')
-    subject_filter = request.args.get('subject')
-    issuer_filter = request.args.get('issuer')
-    serial_filter = request.args.get('serial')
-    fingerprint_filter = request.args.get('fingerprint')
+    # Parse filtering parameters with input sanitization
+    from markupsafe import escape
+    cert_type = escape(request.args.get('type', '')) if request.args.get('type') else None
+    subject_filter = escape(request.args.get('subject', '')) if request.args.get('subject') else None
+    issuer_filter = escape(request.args.get('issuer', '')) if request.args.get('issuer') else None
+    serial_filter = escape(request.args.get('serial', '')) if request.args.get('serial') else None
+    fingerprint_filter = escape(request.args.get('fingerprint', '')) if request.args.get('fingerprint') else None
     from_date = request.args.get('from_date')
     to_date = request.args.get('to_date')
     include_revoked = request.args.get('include_revoked', 'true').lower() == 'true'
@@ -729,16 +731,17 @@ def get_current_crl_number(issuer_identifier):
         }), 200
         
     except Exception as e:  # pragma: no cover
-        return jsonify({'error': f'Failed to get current CRL number: {str(e)}'}), 500  # pragma: no cover
+        ## PRAGMA-NO-COVER Exception; JS 2025-09-03 Database Exception requires SQL bug to test.
+        return jsonify({'error': f'Failed to get current CRL number: {str(e)}'}), 500
 
 
 @api_bp.errorhandler(404)
 def not_found(error):
     """Handle 404 errors."""
-    return jsonify({'error': 'Endpoint not found'}), 404 # pragma: no cover
+    return jsonify({'error': 'Endpoint not found'}), 404
 
 
 @api_bp.errorhandler(500)
 def internal_error(error):
     """Handle 500 errors."""
-    return jsonify({'error': 'Internal server error'}), 500 # pragma: no cover
+    return jsonify({'error': 'Internal server error'}), 500

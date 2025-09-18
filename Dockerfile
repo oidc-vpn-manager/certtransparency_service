@@ -26,7 +26,7 @@ WORKDIR /app
 # Install Python dependencies from wheels
 COPY --from=builder /usr/src/app/wheels /wheels
 COPY requirements.txt .
-RUN pip install --no-cache-dir --find-links /wheels -r requirements.txt --break-system-packages && \
+RUN pip install --no-cache-dir --find-links /wheels -r requirements.txt --break-system-packages --ignore-installed packaging && \
     rm -rf /wheels requirements.txt
 
 # Copy application code and supporting files
