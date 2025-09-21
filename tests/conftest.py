@@ -25,7 +25,8 @@ from pathlib import Path
 certtransparency_service_path = Path(__file__).parent.parent.parent / 'certtransparency_service'
 sys.path.insert(0, str(certtransparency_service_path))
 
-from app.app import create_app, db
+from app.app import create_app
+from app.extensions import db
 from app.config import UnitTestConfig
 
 def pytest_configure(config):

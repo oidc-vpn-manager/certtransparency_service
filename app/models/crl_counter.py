@@ -7,7 +7,7 @@ as required by the X.509 standard (RFC 5280).
 
 from datetime import datetime, timezone
 from sqlalchemy import Column, Integer, String, DateTime, Index
-from app import db
+from app.extensions import db
 
 
 class CRLCounter(db.Model):

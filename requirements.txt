@@ -36,3 +36,6 @@ PyYAML==6.0.2
 # GeoIP
 geoip2==5.1.0
 maxminddb==2.8.2
+
+# Rate Limiting
+Flask-Limiter==3.13

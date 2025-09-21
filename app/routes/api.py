@@ -14,12 +14,13 @@ from app.models.certificate_log import CertificateLog
 from app.models.crl_counter import CRLCounter
 from app.utils.decorators import api_secret_required
 from app.utils.geoip import lookup_country_code
-from app import db
+from app.extensions import db, limiter
 
 api_bp = Blueprint('api', __name__)
 
 
 @api_bp.route('/certificates', methods=['GET'])
+@limiter.limit("100 per minute")
 def list_certificates():
     """
     List certificates with pagination and filtering.
@@ -147,6 +148,7 @@ def list_certificates():
 
 
 @api_bp.route('/certificates/<fingerprint>', methods=['GET'])
+@limiter.limit("200 per minute")
 def get_certificate_by_fingerprint(fingerprint):
     """
     Get a specific certificate by its SHA-256 fingerprint.
@@ -172,6 +174,7 @@ def get_certificate_by_fingerprint(fingerprint):
 
 
 @api_bp.route('/certificates/serial/<serial_number>', methods=['GET'])
+@limiter.limit("200 per minute")
 def get_certificate_by_serial(serial_number):
     """
     Get a specific certificate by its serial number.
@@ -197,6 +200,7 @@ def get_certificate_by_serial(serial_number):
 
 
 @api_bp.route('/certificates/subject/<common_name>', methods=['GET'])
+@limiter.limit("100 per minute")
 def get_certificates_by_subject(common_name):
     """
     Get all certificates for a specific subject common name.
@@ -229,6 +233,7 @@ def get_certificates_by_subject(common_name):
 
 
 @api_bp.route('/statistics', methods=['GET'])
+@limiter.limit("50 per minute")
 def get_statistics():
     """
     Get certificate transparency statistics.
@@ -295,6 +300,7 @@ def get_statistics():
 
 
 @api_bp.route('/search', methods=['GET'])
+@limiter.limit("50 per minute")
 def search_certificates():
     """
     Search certificates with flexible criteria.

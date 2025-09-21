@@ -9,8 +9,6 @@ to view all certificates issued by the OpenVPN Manager without authentication.
 import logging
 import os
 from flask import Flask, send_from_directory
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
 from flask_swagger_ui import get_swaggerui_blueprint
 
 from .config import get_config
@@ -26,9 +24,6 @@ swaggerui_blueprint = get_swaggerui_blueprint(
     }
 )
 
-# Global extensions
-db = SQLAlchemy()
-migrate = Migrate()
 
 def create_app(config_class=None):
     """
@@ -58,8 +53,8 @@ def create_app(config_class=None):
                 app.config[key] = value
     
     # Initialize extensions
-    db.init_app(app)
-    migrate.init_app(app, db)
+    from .extensions import init_extensions
+    init_extensions(app)
     
     # Register blueprints
     from app.routes.api import api_bp

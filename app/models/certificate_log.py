@@ -12,7 +12,8 @@ from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean, Index
 from cryptography import x509
 from cryptography.hazmat.primitives import serialization, hashes
 
-from app import db
+from app.extensions import db
+from app.utils.certificate_validator import validate_certificate_format, CertificateValidationError
 
 
 class CertificateLog(db.Model):
@@ -97,6 +98,9 @@ class CertificateLog(db.Model):
     revoked_at = Column(DateTime(timezone=True), nullable=True, index=True)
     revocation_reason = Column(String(100), nullable=True)
     revoked_by = Column(String(255), nullable=True)  # User ID who performed revocation
+
+    # Validation results
+    validation_warnings = Column(Text, nullable=True)  # JSON array of validation warnings
     
     # Database indexes for efficient queries
     __table_args__ = (
@@ -111,14 +115,28 @@ class CertificateLog(db.Model):
     def __init__(self, certificate_pem, certificate_type, **kwargs):
         """
         Initialize a certificate log entry from a PEM certificate.
-        
+
         Args:
             certificate_pem (str): PEM-encoded certificate
             certificate_type (str): Type of certificate ('client', 'server', 'intermediate')
             **kwargs: Additional fields to set
+
+        Raises:
+            CertificateValidationError: If certificate validation fails
         """
-        # Parse the certificate to extract information
-        cert = x509.load_pem_x509_certificate(certificate_pem.encode('utf-8'))
+        # Check if validation should be bypassed (for testing)
+        skip_validation = kwargs.pop('skip_validation', False)
+
+        if skip_validation:
+            # Parse certificate without validation for testing
+            cert = x509.load_pem_x509_certificate(certificate_pem.encode('utf-8'))
+        else:
+            # Enhanced certificate validation and parsing
+            cert, validation_results = validate_certificate_format(certificate_pem, certificate_type)
+
+            # Store validation results for audit purposes
+            if validation_results.get('warnings'):
+                kwargs.setdefault('validation_warnings', json.dumps(validation_results['warnings']))
         
         # Basic certificate information
         self.certificate_pem = certificate_pem
@@ -282,6 +300,10 @@ class CertificateLog(db.Model):
             data['key_usage'] = json.loads(self.key_usage)
         if self.extended_key_usage:
             data['extended_key_usage'] = json.loads(self.extended_key_usage)
+
+        # Add validation warnings if present
+        if self.validation_warnings:
+            data['validation_warnings'] = json.loads(self.validation_warnings)
         
         # Add user tracking information
         data['issuing_user_id'] = self.issuing_user_id
@@ -342,25 +364,25 @@ class CertificateLog(db.Model):
     def log_certificate(cls, certificate_pem, certificate_type, **kwargs):
         """
         Create and save a certificate log entry.
-        
+
         For append-only CT logs, we should not log the same certificate twice.
         This method checks for duplicates and raises an error if the certificate
         has already been logged.
-        
+
         Args:
             certificate_pem (str): PEM-encoded certificate
             certificate_type (str): Type of certificate
-            **kwargs: Additional fields
-            
+            **kwargs: Additional fields (including optional skip_validation for testing)
+
         Returns:
             CertificateLog: Created certificate log entry
-            
+
         Raises:
             ValueError: If the certificate has already been logged
         """
         # Create a temporary instance to get the fingerprint
         temp_entry = cls(certificate_pem, certificate_type, **kwargs)
-        
+
         # Append-only CT architecture: Log every interaction as a separate event
         # Duplicates are allowed as they represent separate logging events
         db.session.add(temp_entry)

@@ -6,7 +6,7 @@ import pytest
 import json
 from unittest.mock import patch
 from app.models.certificate_log import CertificateLog
-from app import db
+from app.extensions import db
 
 
 class TestAPIRoutes:
@@ -590,7 +590,7 @@ class TestAPIRevocationEndpoint:
                 revoked_by='initial_user'
             )
             
-            from app import db
+            from app.extensions import db
             db.session.add(revocation_record)
             db.session.commit()
         
@@ -819,7 +819,7 @@ class TestAPIBulkRevocationEndpoint:
             # Set issuing_user_id so bulk revocation can find it
             test_user_id = "test_user_123" 
             log_entry.issuing_user_id = test_user_id
-            from app import db
+            from app.extensions import db
             db.session.commit()
             
             # Revoke the certificate first to create a revoked record

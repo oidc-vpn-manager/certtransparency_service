@@ -5,7 +5,7 @@ Unit tests for CRL Counter model.
 import pytest
 from datetime import datetime, timezone
 from app.models.crl_counter import CRLCounter
-from app import db
+from app.extensions import db
 
 
 class TestCRLCounterModel:

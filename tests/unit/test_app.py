@@ -79,7 +79,7 @@ def test_create_app_blueprints_registered():
 
 def test_create_app_extensions_initialized():
     """Test that extensions are properly initialized."""
-    from app.app import db, migrate
+    from app.extensions import db, migrate
     
     app = create_app(config_class=UnitTestConfig)
     

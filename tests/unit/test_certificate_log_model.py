@@ -5,7 +5,7 @@ Unit tests for Certificate Transparency Log model.
 import pytest
 from datetime import datetime, timezone
 from app.models.certificate_log import CertificateLog
-from app import db
+from app.extensions import db
 
 
 class TestCertificateLogModel:
@@ -166,7 +166,7 @@ vNY3M/KqQv2zV8CcmXrWXg8kcK1vXY4dZJhHhj4VqRZbFxzHdR9hNl8pKqR3
                 
                 mock_load_cert.return_value = mock_cert
                 
-                log_entry = CertificateLog(test_cert_pem, 'client')
+                log_entry = CertificateLog(test_cert_pem, 'client', skip_validation=True)
                 
                 # Verify key_size is None when not available
                 assert log_entry.key_size is None
@@ -232,7 +232,7 @@ vNY3M/KqQv2zV8CcmXrWXg8kcK1vXY4dZJhHhj4VqRZbFxzHdR9hNl8pKqR3
                 mock_cert.extensions.get_extension_for_oid.side_effect = mock_get_extension_for_oid
                 mock_load_cert.return_value = mock_cert
                 
-                log_entry = CertificateLog(test_cert_pem, 'client')
+                log_entry = CertificateLog(test_cert_pem, 'client', skip_validation=True)
                 
                 # Verify Subject Alternative Names are processed correctly
                 expected_sans = ["DNS:example.com", "IP:192.168.1.1", "email:test@example.com"]
@@ -298,7 +298,7 @@ vNY3M/KqQv2zV8CcmXrWXg8kcK1vXY4dZJhHhj4VqRZbFxzHdR9hNl8pKqR3
                 mock_cert.extensions.get_extension_for_oid.side_effect = mock_get_extension_for_oid
                 mock_load_cert.return_value = mock_cert
                 
-                log_entry = CertificateLog(test_cert_pem, 'client')
+                log_entry = CertificateLog(test_cert_pem, 'client', skip_validation=True)
                 
                 # Verify Key Usage are processed correctly
                 expected_key_usage = ["digital_signature", "key_encipherment", "key_agreement"]
@@ -351,7 +351,7 @@ vNY3M/KqQv2zV8CcmXrWXg8kcK1vXY4dZJhHhj4VqRZbFxzHdR9hNl8pKqR3
                 
                 mock_load_cert.return_value = mock_cert
                 
-                log_entry = CertificateLog(test_cert_pem, 'client')
+                log_entry = CertificateLog(test_cert_pem, 'client', skip_validation=True)
                 
                 # Verify Key Usage is None when extension not found
                 assert log_entry.key_usage is None
@@ -415,7 +415,7 @@ vNY3M/KqQv2zV8CcmXrWXg8kcK1vXY4dZJhHhj4VqRZbFxzHdR9hNl8pKqR3
                 mock_cert.extensions.get_extension_for_oid.side_effect = mock_get_extension_for_oid
                 mock_load_cert.return_value = mock_cert
                 
-                log_entry = CertificateLog(test_cert_pem, 'client')
+                log_entry = CertificateLog(test_cert_pem, 'client', skip_validation=True)
                 
                 # Verify Extended Key Usage are processed correctly
                 expected_eku = ["client_auth", "server_auth", "code_signing", "email_protection"]
@@ -482,7 +482,7 @@ vNY3M/KqQv2zV8CcmXrWXg8kcK1vXY4dZJhHhj4VqRZbFxzHdR9hNl8pKqR3
                 mock_cert.extensions.get_extension_for_oid.side_effect = mock_get_extension_for_oid
                 mock_load_cert.return_value = mock_cert
                 
-                log_entry = CertificateLog(test_cert_pem, 'client')
+                log_entry = CertificateLog(test_cert_pem, 'client', skip_validation=True)
                 result_dict = log_entry.to_dict()
                 
                 # Verify extensions are included in to_dict - lines 248, 252

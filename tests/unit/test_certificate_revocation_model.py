@@ -7,7 +7,7 @@ These tests follow TDD methodology for implementing certificate revocation featu
 import pytest
 from datetime import datetime, timezone
 from app.models.certificate_log import CertificateLog
-from app import db
+from app.extensions import db
 
 
 class TestCertificateRevocationModel:

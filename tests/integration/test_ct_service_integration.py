@@ -5,7 +5,7 @@ Integration tests for Certificate Transparency Service.
 import json
 from datetime import datetime, timezone
 from app.models.certificate_log import CertificateLog
-from app import db
+from app.extensions import db
 
 
 class TestCTServiceIntegration:

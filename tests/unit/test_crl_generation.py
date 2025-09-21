@@ -10,7 +10,7 @@ from cryptography import x509
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import ed25519, rsa
 from app.models.certificate_log import CertificateLog
-from app import db
+from app.extensions import db
 
 
 @pytest.fixture

@@ -79,6 +79,11 @@ class Config:
             'CT_SERVICE_API_SECRET', None
         )
 
+        # Rate Limiting Configuration
+        self.RATELIMIT_STORAGE_URI = loadConfigValueFromFileOrEnvironment(
+            'RATELIMIT_STORAGE_URL', 'memory://'
+        )
+
 class DevelopmentConfig(Config):
     """Development configuration."""
     
