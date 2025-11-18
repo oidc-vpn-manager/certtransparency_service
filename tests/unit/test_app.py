@@ -91,10 +91,13 @@ def test_create_app_extensions_initialized():
 def test_swagger_spec_route():
     """Test swagger specification file serving route (line 75)."""
     app = create_app(config_class=UnitTestConfig)
-    
+
     with app.test_client() as client:
         response = client.get('/swagger.yaml')
-        
+
         # Should return the swagger.yaml file
         assert response.status_code == 200
-        assert response.headers['Content-Type'].startswith('text/plain') or response.headers['Content-Type'].startswith('application/octet-stream')
+        # Flask now correctly returns application/yaml for YAML files
+        assert response.headers['Content-Type'].startswith('application/yaml') or \
+               response.headers['Content-Type'].startswith('text/plain') or \
+               response.headers['Content-Type'].startswith('application/octet-stream')

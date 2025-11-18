@@ -120,9 +120,9 @@ VGhpcyBpcyBub3QgYSB2YWxpZCBjZXJ0aWZpY2F0ZQ==
         cert = x509.CertificateBuilder().subject_name(subject).issuer_name(issuer).public_key(
             private_key.public_key()
         ).serial_number(12345).not_valid_before(
-            datetime.utcnow()
+            datetime.now(timezone.utc)
         ).not_valid_after(
-            datetime.utcnow() + timedelta(days=365)
+            datetime.now(timezone.utc) + timedelta(days=365)
         ).sign(private_key, hashes.SHA256())
 
         validator = CertificateValidator()
@@ -141,9 +141,9 @@ VGhpcyBpcyBub3QgYSB2YWxpZCBjZXJ0aWZpY2F0ZQ==
         cert = x509.CertificateBuilder().subject_name(subject).issuer_name(issuer).public_key(
             private_key.public_key()
         ).serial_number(12345).not_valid_before(
-            datetime.utcnow()
+            datetime.now(timezone.utc)
         ).not_valid_after(
-            datetime.utcnow() + timedelta(days=365)
+            datetime.now(timezone.utc) + timedelta(days=365)
         ).sign(private_key, hashes.SHA256())
 
         # Mock version to not be X509v3
@@ -189,9 +189,9 @@ class TestPublicKeyValidation:
         cert = x509.CertificateBuilder().subject_name(subject).issuer_name(issuer).public_key(
             private_key.public_key()
         ).serial_number(12345).not_valid_before(
-            datetime.utcnow()
+            datetime.now(timezone.utc)
         ).not_valid_after(
-            datetime.utcnow() + timedelta(days=365)
+            datetime.now(timezone.utc) + timedelta(days=365)
         ).sign(private_key, hashes.SHA256())
 
         validator = CertificateValidator()
@@ -210,9 +210,9 @@ class TestPublicKeyValidation:
         cert = x509.CertificateBuilder().subject_name(subject).issuer_name(issuer).public_key(
             private_key.public_key()
         ).serial_number(12345).not_valid_before(
-            datetime.utcnow()
+            datetime.now(timezone.utc)
         ).not_valid_after(
-            datetime.utcnow() + timedelta(days=365)
+            datetime.now(timezone.utc) + timedelta(days=365)
         ).sign(private_key, hashes.SHA256())
 
         validator = CertificateValidator()
@@ -232,7 +232,7 @@ class TestValidityPeriodValidation:
         private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
         subject = issuer = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, "test.example.com")])
 
-        past_date = datetime.utcnow() - timedelta(days=365)
+        past_date = datetime.now(timezone.utc) - timedelta(days=365)
         cert = x509.CertificateBuilder().subject_name(subject).issuer_name(issuer).public_key(
             private_key.public_key()
         ).serial_number(12345).not_valid_before(
@@ -254,7 +254,7 @@ class TestValidityPeriodValidation:
         private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
         subject = issuer = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, "test.example.com")])
 
-        future_date = datetime.utcnow() + timedelta(days=30)
+        future_date = datetime.now(timezone.utc) + timedelta(days=30)
         cert = x509.CertificateBuilder().subject_name(subject).issuer_name(issuer).public_key(
             private_key.public_key()
         ).serial_number(12345).not_valid_before(
@@ -279,9 +279,9 @@ class TestValidityPeriodValidation:
         cert = x509.CertificateBuilder().subject_name(subject).issuer_name(issuer).public_key(
             private_key.public_key()
         ).serial_number(12345).not_valid_before(
-            datetime.utcnow()
+            datetime.now(timezone.utc)
         ).not_valid_after(
-            datetime.utcnow() + timedelta(days=500)  # Too long for client cert (max 395 days)
+            datetime.now(timezone.utc) + timedelta(days=500)  # Too long for client cert (max 395 days)
         ).sign(private_key, hashes.SHA256())
 
         validator = CertificateValidator()
@@ -303,9 +303,9 @@ class TestExtensionValidation:
         cert = x509.CertificateBuilder().subject_name(subject).issuer_name(issuer).public_key(
             private_key.public_key()
         ).serial_number(12345).not_valid_before(
-            datetime.utcnow()
+            datetime.now(timezone.utc)
         ).not_valid_after(
-            datetime.utcnow() + timedelta(days=365)
+            datetime.now(timezone.utc) + timedelta(days=365)
         ).sign(private_key, hashes.SHA256())
 
         validator = CertificateValidator()
@@ -323,9 +323,9 @@ class TestExtensionValidation:
         cert = x509.CertificateBuilder().subject_name(subject).issuer_name(issuer).public_key(
             private_key.public_key()
         ).serial_number(12345).not_valid_before(
-            datetime.utcnow()
+            datetime.now(timezone.utc)
         ).not_valid_after(
-            datetime.utcnow() + timedelta(days=365)
+            datetime.now(timezone.utc) + timedelta(days=365)
         ).sign(private_key, None)  # Ed25519 doesn't need hash algorithm
 
         validator = CertificateValidator()
@@ -414,9 +414,9 @@ class TestSubjectIssuerValidation:
         cert = x509.CertificateBuilder().subject_name(subject).issuer_name(issuer).public_key(
             private_key.public_key()
         ).serial_number(12345).not_valid_before(
-            datetime.utcnow()
+            datetime.now(timezone.utc)
         ).not_valid_after(
-            datetime.utcnow() + timedelta(days=365)
+            datetime.now(timezone.utc) + timedelta(days=365)
         ).sign(private_key, hashes.SHA256())
 
         validator = CertificateValidator()
@@ -435,9 +435,9 @@ class TestSubjectIssuerValidation:
         cert = x509.CertificateBuilder().subject_name(subject).issuer_name(issuer).public_key(
             private_key.public_key()
         ).serial_number(12345).not_valid_before(
-            datetime.utcnow()
+            datetime.now(timezone.utc)
         ).not_valid_after(
-            datetime.utcnow() + timedelta(days=365)
+            datetime.now(timezone.utc) + timedelta(days=365)
         ).sign(private_key, hashes.SHA256())
 
         validator = CertificateValidator()
@@ -511,9 +511,9 @@ class TestValidationErrors:
         cert = x509.CertificateBuilder().subject_name(subject).issuer_name(issuer).public_key(
             private_key.public_key()
         ).serial_number(12345).not_valid_before(
-            datetime.utcnow()
+            datetime.now(timezone.utc)
         ).not_valid_after(
-            datetime.utcnow() + timedelta(days=365)
+            datetime.now(timezone.utc) + timedelta(days=365)
         ).sign(private_key, hashes.SHA256())
 
         cert_pem = cert.public_bytes(serialization.Encoding.PEM).decode('utf-8')
@@ -535,9 +535,9 @@ class TestDSAKeyValidation:
         cert = x509.CertificateBuilder().subject_name(subject).issuer_name(issuer).public_key(
             private_key.public_key()
         ).serial_number(12345).not_valid_before(
-            datetime.utcnow()
+            datetime.now(timezone.utc)
         ).not_valid_after(
-            datetime.utcnow() + timedelta(days=365)
+            datetime.now(timezone.utc) + timedelta(days=365)
         ).sign(private_key, hashes.SHA256())
 
         validator = CertificateValidator()
@@ -574,9 +574,9 @@ class TestCompleteValidationWorkflow:
         cert_builder = x509.CertificateBuilder().subject_name(subject).issuer_name(issuer).public_key(
             private_key.public_key()
         ).serial_number(12345).not_valid_before(
-            datetime.utcnow()
+            datetime.now(timezone.utc)
         ).not_valid_after(
-            datetime.utcnow() + timedelta(days=500)  # Too long, will generate warning
+            datetime.now(timezone.utc) + timedelta(days=500)  # Too long, will generate warning
         )
 
         # Add required extensions for client certificate
@@ -623,9 +623,9 @@ class TestCertificateValidatorWithoutFlask:
         cert = x509.CertificateBuilder().subject_name(subject).issuer_name(issuer).public_key(
             private_key.public_key()
         ).serial_number(12345).not_valid_before(
-            datetime.utcnow()
+            datetime.now(timezone.utc)
         ).not_valid_after(
-            datetime.utcnow() + timedelta(days=365)
+            datetime.now(timezone.utc) + timedelta(days=365)
         ).sign(private_key, hashes.SHA256())
 
         cert_pem = cert.public_bytes(serialization.Encoding.PEM).decode('utf-8')
@@ -645,9 +645,9 @@ class TestCertificateValidatorWithoutFlask:
         cert = x509.CertificateBuilder().subject_name(subject).issuer_name(issuer).public_key(
             private_key.public_key()
         ).serial_number(12345).not_valid_before(
-            datetime.utcnow()
+            datetime.now(timezone.utc)
         ).not_valid_after(
-            datetime.utcnow() + timedelta(days=365)
+            datetime.now(timezone.utc) + timedelta(days=365)
         ).sign(private_key, hashes.SHA256())
 
         validator = CertificateValidator()
@@ -665,9 +665,9 @@ class TestCertificateValidatorWithoutFlask:
         cert = x509.CertificateBuilder().subject_name(subject).issuer_name(issuer).public_key(
             private_key.public_key()
         ).serial_number(12345).not_valid_before(
-            datetime.utcnow()
+            datetime.now(timezone.utc)
         ).not_valid_after(
-            datetime.utcnow() + timedelta(days=365)
+            datetime.now(timezone.utc) + timedelta(days=365)
         ).sign(private_key, hashes.SHA256())
 
         validator = CertificateValidator()
@@ -685,9 +685,9 @@ class TestCertificateValidatorWithoutFlask:
         cert = x509.CertificateBuilder().subject_name(subject).issuer_name(issuer).public_key(
             private_key.public_key()
         ).serial_number(12345).not_valid_before(
-            datetime.utcnow()
+            datetime.now(timezone.utc)
         ).not_valid_after(
-            datetime.utcnow() + timedelta(days=365)  # Valid 1-year period
+            datetime.now(timezone.utc) + timedelta(days=365)  # Valid 1-year period
         ).sign(private_key, hashes.SHA256())
 
         validator = CertificateValidator()
@@ -705,9 +705,9 @@ class TestCertificateValidatorWithoutFlask:
         cert = x509.CertificateBuilder().subject_name(subject).issuer_name(issuer).public_key(
             private_key.public_key()
         ).serial_number(12345).not_valid_before(
-            datetime.utcnow()
+            datetime.now(timezone.utc)
         ).not_valid_after(
-            datetime.utcnow() + timedelta(days=365)
+            datetime.now(timezone.utc) + timedelta(days=365)
         ).sign(private_key, hashes.SHA256())  # Strong signature algorithm
 
         validator = CertificateValidator()
@@ -725,9 +725,9 @@ class TestCertificateValidatorWithoutFlask:
         cert = x509.CertificateBuilder().subject_name(subject).issuer_name(issuer).public_key(
             private_key.public_key()
         ).serial_number(12345).not_valid_before(
-            datetime.utcnow()
+            datetime.now(timezone.utc)
         ).not_valid_after(
-            datetime.utcnow() + timedelta(days=365)
+            datetime.now(timezone.utc) + timedelta(days=365)
         ).sign(private_key, None)  # Ed25519 doesn't need hash algorithm
 
         validator = CertificateValidator()
@@ -746,9 +746,9 @@ class TestCertificateValidatorWithoutFlask:
         cert_builder = x509.CertificateBuilder().subject_name(subject).issuer_name(issuer).public_key(
             private_key.public_key()
         ).serial_number(12345).not_valid_before(
-            datetime.utcnow()
+            datetime.now(timezone.utc)
         ).not_valid_after(
-            datetime.utcnow() + timedelta(days=365)
+            datetime.now(timezone.utc) + timedelta(days=365)
         )
 
         # Add key usage extension
@@ -817,9 +817,9 @@ class TestMissingCoverageTargets:
         cert = x509.CertificateBuilder().subject_name(subject).issuer_name(issuer).public_key(
             private_key.public_key()
         ).serial_number(12345).not_valid_before(
-            datetime.utcnow()
+            datetime.now(timezone.utc)
         ).not_valid_after(
-            datetime.utcnow() + timedelta(days=365)
+            datetime.now(timezone.utc) + timedelta(days=365)
         ).sign(private_key, hashes.SHA256())
 
         validator = CertificateValidator()
@@ -837,9 +837,9 @@ class TestMissingCoverageTargets:
         cert = x509.CertificateBuilder().subject_name(subject).issuer_name(issuer).public_key(
             private_key.public_key()
         ).serial_number(12345).not_valid_before(
-            datetime.utcnow()
+            datetime.now(timezone.utc)
         ).not_valid_after(
-            datetime.utcnow() + timedelta(days=365)
+            datetime.now(timezone.utc) + timedelta(days=365)
         ).sign(private_key, hashes.SHA256())
 
         validator = CertificateValidator()
@@ -1041,9 +1041,9 @@ class TestMissingCoverageTargets:
         cert_builder = x509.CertificateBuilder().subject_name(subject).issuer_name(issuer).public_key(
             private_key.public_key()
         ).serial_number(12345).not_valid_before(
-            datetime.utcnow()
+            datetime.now(timezone.utc)
         ).not_valid_after(
-            datetime.utcnow() + timedelta(days=365)
+            datetime.now(timezone.utc) + timedelta(days=365)
         )
 
         # Add required extensions for client certificate
