@@ -44,9 +44,16 @@ def list_certificates():
         JSON response with certificate list and pagination metadata
     """
     # Parse pagination parameters with security validation
-    page = max(1, request.args.get('page', 1, type=int))  # Ensure page >= 1
-    limit = request.args.get('limit', 100, type=int)
-    limit = max(1, min(limit, 1000))  # Ensure 1 <= limit <= 1000
+    try:
+        page = max(1, request.args.get('page', 1, type=int))  # Ensure page >= 1
+    except (ValueError, TypeError):
+        page = 1  # Default to page 1 if invalid
+
+    try:
+        limit = request.args.get('limit', 100, type=int)
+        limit = max(1, min(limit, 1000))  # Ensure 1 <= limit <= 1000
+    except (ValueError, TypeError):
+        limit = 100  # Default to 100 if invalid
     
     # Parse filtering parameters with input sanitization
     from markupsafe import escape
