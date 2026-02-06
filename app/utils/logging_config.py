@@ -29,7 +29,7 @@ class JSONFormatter(logging.Formatter):
             'level': record.levelname,
             'logger': record.name,
             'message': record.getMessage(),
-            'service': 'openvpn-manager-certtransparency',
+            'service': 'oidc-vpn-manager-certtransparency',
             'version': '1.0',
         }
 

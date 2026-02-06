@@ -45,7 +45,7 @@ class TestJSONFormatter:
         assert parsed['level'] == 'INFO'
         assert parsed['logger'] == 'test_logger'
         assert parsed['message'] == 'Test message'
-        assert parsed['service'] == 'openvpn-manager-certtransparency'
+        assert parsed['service'] == 'oidc-vpn-manager-certtransparency'
         assert 'timestamp' in parsed
 
     def test_format_with_process_and_thread(self):
