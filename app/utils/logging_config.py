@@ -1,5 +1,5 @@
 """
-Logging Configuration for OpenVPN Manager Certificate Transparency Service
+Logging Configuration for OIDC VPN Manager Certificate Transparency Service
 
 This module configures structured JSON logging for the Certificate Transparency service,
 with separate loggers for security events, application events, and access logs.

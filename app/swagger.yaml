@@ -1,8 +1,8 @@
 openapi: 3.0.0
 info:
-  title: OpenVPN Manager Certificate Transparency API
+  title: OIDC VPN Manager Certificate Transparency API
   description: |
-    API for the OpenVPN Manager Certificate Transparency service.
+    API for the OIDC VPN Manager Certificate Transparency service.
     
     This service provides an immutable audit log of all certificate operations
     including issuance and revocation. It supports both public read access
@@ -308,7 +308,7 @@ components:
         issuer_common_name:
           type: string
           description: Certificate issuer common name
-          example: "OpenVPN Manager Intermediate CA"
+          example: "OIDC VPN Manager Intermediate CA"
         certificate_type:
           type: string
           enum: [client, server, intermediate]

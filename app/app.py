@@ -3,7 +3,7 @@ Flask application factory for the Certificate Transparency Service.
 
 This service provides unauthenticated access to certificate transparency logs
 for compliance and audit purposes. It allows internal systems and auditors
-to view all certificates issued by the OpenVPN Manager without authentication.
+to view all certificates issued by the OIDC VPN Manager without authentication.
 """
 
 import logging
@@ -20,7 +20,7 @@ swaggerui_blueprint = get_swaggerui_blueprint(
     SWAGGER_URL,
     API_URL,
     config={
-        'app_name': "OpenVPN Manager Certificate Transparency API"
+        'app_name': "OIDC VPN Manager Certificate Transparency API"
     }
 )
 

@@ -1,10 +1,10 @@
 # Certificate Transparency Service
 
-This file provides LLMs with guidance for working with the Certificate Transparency Service component of OpenVPN Manager.
+This file provides LLMs with guidance for working with the Certificate Transparency Service component of OIDC VPN Manager.
 
 ## Service Overview
 
-The Certificate Transparency Service is a specialized microservice that provides an unauthenticated, read-only audit log of all certificates issued by OpenVPN Manager. It operates on port 8800 and maintains a complete, append-only record of certificate operations for transparency and compliance.
+The Certificate Transparency Service is a specialized microservice that provides an unauthenticated, read-only audit log of all certificates issued by OIDC VPN Manager. It operates on port 8800 and maintains a complete, append-only record of certificate operations for transparency and compliance.
 
 ## Architecture
 

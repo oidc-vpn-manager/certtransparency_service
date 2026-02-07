@@ -2,7 +2,7 @@
 Certificate Transparency Log Model.
 
 This model stores certificate transparency logs for all certificates
-issued by the OpenVPN Manager system, providing a public audit trail
+issued by the OIDC VPN Manager system, providing a public audit trail
 for certificate issuance.
 """
 
