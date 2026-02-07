@@ -1004,3 +1004,94 @@ class TestGeoIPIntegrationAPI:
         # Verify debug logging for successful GeoIP lookup
         assert "GeoIP lookup for 1.2.3.4: CA" in caplog.text
 
+
+class TestPaginationExceptionHandling:
+    """Tests for pagination parameter exception handling in list_certificates (lines 49-50, 55-56).
+
+    Flask's request.args.get(type=int) normally catches conversion errors internally,
+    so these exceptions are tested by mocking request.args to raise during parsing.
+    This verifies the defensive error handling works correctly.
+    """
+
+    def test_page_parameter_value_error(self, app):
+        """Test that ValueError in page parameter parsing defaults to page 1 (lines 49-50)."""
+        with app.test_request_context('/api/v1/certificates'):
+            with patch('app.routes.api.request') as mock_request:
+                mock_request.args = _RaisingArgs(raise_on='page', error=ValueError("invalid literal"))
+                from app.routes.api import list_certificates
+                response = list_certificates()
+                # jsonify returns (response, status_code) when status code is specified
+                if isinstance(response, tuple):
+                    response_obj, status = response
+                else:
+                    response_obj, status = response, 200
+                assert status == 200
+                data = json.loads(response_obj.get_data())
+                assert data['pagination']['page'] == 1
+
+    def test_limit_parameter_value_error(self, app):
+        """Test that ValueError in limit parameter parsing defaults to limit 100 (lines 55-56)."""
+        with app.test_request_context('/api/v1/certificates'):
+            with patch('app.routes.api.request') as mock_request:
+                mock_request.args = _RaisingArgs(raise_on='limit', error=ValueError("invalid literal"))
+                from app.routes.api import list_certificates
+                response = list_certificates()
+                if isinstance(response, tuple):
+                    response_obj, status = response
+                else:
+                    response_obj, status = response, 200
+                assert status == 200
+                data = json.loads(response_obj.get_data())
+                assert data['pagination']['per_page'] == 100
+
+    def test_page_parameter_type_error(self, app):
+        """Test that TypeError in page parameter parsing defaults to page 1 (lines 49-50)."""
+        with app.test_request_context('/api/v1/certificates'):
+            with patch('app.routes.api.request') as mock_request:
+                mock_request.args = _RaisingArgs(raise_on='page', error=TypeError("unsupported operand"))
+                from app.routes.api import list_certificates
+                response = list_certificates()
+                if isinstance(response, tuple):
+                    response_obj, status = response
+                else:
+                    response_obj, status = response, 200
+                assert status == 200
+                data = json.loads(response_obj.get_data())
+                assert data['pagination']['page'] == 1
+
+    def test_limit_parameter_type_error(self, app):
+        """Test that TypeError in limit parameter parsing defaults to limit 100 (lines 55-56)."""
+        with app.test_request_context('/api/v1/certificates'):
+            with patch('app.routes.api.request') as mock_request:
+                mock_request.args = _RaisingArgs(raise_on='limit', error=TypeError("unsupported operand"))
+                from app.routes.api import list_certificates
+                response = list_certificates()
+                if isinstance(response, tuple):
+                    response_obj, status = response
+                else:
+                    response_obj, status = response, 200
+                assert status == 200
+                data = json.loads(response_obj.get_data())
+                assert data['pagination']['per_page'] == 100
+
+
+class _RaisingArgs:
+    """Helper class that raises an exception when a specific parameter is accessed via get().
+
+    Used to simulate corrupted request arguments that cause ValueError or TypeError
+    during pagination parameter parsing.
+    """
+
+    def __init__(self, raise_on, error):
+        self._raise_on = raise_on
+        self._error = error
+
+    def get(self, key, *args, **kwargs):
+        """Raise the configured error for the target parameter, return caller's default for others."""
+        if key == self._raise_on:
+            raise self._error
+        # Return the caller-provided default value
+        if args:
+            return args[0]
+        return kwargs.get('default', None)
+
