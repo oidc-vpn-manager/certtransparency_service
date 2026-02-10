@@ -22,6 +22,7 @@ The Certificate Transparency Service is a specialized microservice that provides
     - `log_client.py` - External CT log integration
     - `decorators.py` - Authentication and validation decorators
     - `environment.py` - Environment configuration handling
+    - `tls_setup.py` - Application-level TLS configuration and snakeoil cert generation
   - `config.py` - Application configuration
   - `app.py` - Flask application factory
 
@@ -118,6 +119,27 @@ flask db downgrade
 - `GEOIP_DATABASE_PATH` - Path to GeoIP database file
 - `EXTERNAL_CT_LOG_URL` - External CT log service URL (optional)
 - `CRL_SIGNING_KEY_FILE` - CRL signing private key (optional)
+
+### Application-Level TLS
+
+The service supports in-built TLS at the Gunicorn level, configured via environment variables:
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `ENABLE_APPLICATION_TLS` | `true` | Enable/disable TLS on the Gunicorn server |
+| `APPLICATION_TLS_CERT` | `/app/tls/application.crt` | Path to TLS certificate |
+| `APPLICATION_TLS_KEY` | `/app/tls/application.key` | Path to TLS private key |
+| `APPLICATION_CA_CERT` | (empty) | Optional CA certificate for chain serving |
+| `APPLICATION_TLS_CN` | container hostname | Common name for snakeoil cert |
+| `APPLICATION_TLS_SAN` | container hostname | Comma-separated SANs for snakeoil cert |
+
+**Snakeoil Certificates**: If `ENABLE_APPLICATION_TLS` is enabled but the cert/key files don't exist at the configured paths, the service auto-generates a self-signed EC P-256 certificate on startup. This requires writable paths at the cert/key locations (handled by emptyDir volume mount in Kubernetes).
+
+**Chain Serving**: When `APPLICATION_CA_CERT` is set and the file exists, the server cert and CA cert are concatenated into a chain file at `/tmp/tls/chain.crt`, which is passed to Gunicorn's `--certfile`. This allows clients to validate the full certificate chain.
+
+**Startup**: The service uses `entrypoint.py` which calls `configure_tls_for_gunicorn()` from `app/utils/tls_setup.py`, then execs Gunicorn with appropriate `--certfile`/`--keyfile` arguments.
+
+**Healthcheck**: The Dockerfile HEALTHCHECK is TLS-aware and automatically uses `https://` when `ENABLE_APPLICATION_TLS` is enabled, with `verify=False` for self-signed certificates.
 
 ### Database Configuration
 - PostgreSQL database for certificate records
@@ -226,6 +248,7 @@ flask db downgrade
 - `run_migrate.sh` - Database migration helper
 - `tests/` - Comprehensive test suite
 - `wsgi.py` - WSGI application entry point
+- `entrypoint.py` - Python entrypoint for TLS-aware Gunicorn startup
 - `Dockerfile` - Container build configuration
 
 ## Compliance & Regulatory Notes
