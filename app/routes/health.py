@@ -27,15 +27,13 @@ def health_check():
         return jsonify({
             'status': 'healthy',
             'service': 'certificate-transparency',
-            'version': '1.0.0',
             'database': 'connected'
         }), 200
-        
+
     except Exception as e:
         return jsonify({
             'status': 'unhealthy',
             'service': 'certificate-transparency',
-            'version': '1.0.0',
             'database': 'disconnected',
             'error': str(e)
         }), 503

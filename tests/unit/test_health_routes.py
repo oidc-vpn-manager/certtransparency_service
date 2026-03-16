@@ -18,8 +18,8 @@ class TestHealthRoutes:
         data = json.loads(response.data)
         assert data['status'] == 'healthy'
         assert data['service'] == 'certificate-transparency'
-        assert data['version'] == '1.0.0'
         assert data['database'] == 'connected'
+        assert 'version' not in data
     
     def test_health_check_database_failure(self, client):
         """Test health check with database connection failure - lines 34-35."""
@@ -32,8 +32,8 @@ class TestHealthRoutes:
             data = json.loads(response.data)
             assert data['status'] == 'unhealthy'
             assert data['service'] == 'certificate-transparency'
-            assert data['version'] == '1.0.0'
             assert data['database'] == 'disconnected'
+            assert 'version' not in data
             assert 'error' in data
     
     def test_readiness_check_success(self, client):
