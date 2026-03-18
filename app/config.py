@@ -83,6 +83,10 @@ class Config:
         self.RATELIMIT_STORAGE_URI = loadConfigValueFromFileOrEnvironment(
             'RATELIMIT_STORAGE_URL', 'memory://'
         )
+        self.RATELIMIT_ENABLED = os.environ.get('RATELIMIT_ENABLED', 'true').lower() != 'false'
+        self.CT_LIST_RATE_LIMIT = os.environ.get('CT_LIST_RATE_LIMIT', '100/minute')
+        self.CT_GET_RATE_LIMIT = os.environ.get('CT_GET_RATE_LIMIT', '200/minute')
+        self.CT_SEARCH_RATE_LIMIT = os.environ.get('CT_SEARCH_RATE_LIMIT', '50/minute')
 
 class DevelopmentConfig(Config):
     """Development configuration."""

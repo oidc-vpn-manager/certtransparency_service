@@ -20,7 +20,7 @@ api_bp = Blueprint('api', __name__)
 
 
 @api_bp.route('/certificates', methods=['GET'])
-@limiter.limit("100 per minute")
+@limiter.limit(lambda: current_app.config.get('CT_LIST_RATE_LIMIT', '100/minute'))
 def list_certificates():
     """
     List certificates with pagination and filtering.
@@ -155,7 +155,7 @@ def list_certificates():
 
 
 @api_bp.route('/certificates/<fingerprint>', methods=['GET'])
-@limiter.limit("200 per minute")
+@limiter.limit(lambda: current_app.config.get('CT_GET_RATE_LIMIT', '200/minute'))
 def get_certificate_by_fingerprint(fingerprint):
     """
     Get a specific certificate by its SHA-256 fingerprint.
@@ -181,7 +181,7 @@ def get_certificate_by_fingerprint(fingerprint):
 
 
 @api_bp.route('/certificates/serial/<serial_number>', methods=['GET'])
-@limiter.limit("200 per minute")
+@limiter.limit(lambda: current_app.config.get('CT_GET_RATE_LIMIT', '200/minute'))
 def get_certificate_by_serial(serial_number):
     """
     Get a specific certificate by its serial number.
@@ -207,7 +207,7 @@ def get_certificate_by_serial(serial_number):
 
 
 @api_bp.route('/certificates/subject/<common_name>', methods=['GET'])
-@limiter.limit("100 per minute")
+@limiter.limit(lambda: current_app.config.get('CT_LIST_RATE_LIMIT', '100/minute'))
 def get_certificates_by_subject(common_name):
     """
     Get all certificates for a specific subject common name.
@@ -240,7 +240,7 @@ def get_certificates_by_subject(common_name):
 
 
 @api_bp.route('/statistics', methods=['GET'])
-@limiter.limit("50 per minute")
+@limiter.limit(lambda: current_app.config.get('CT_SEARCH_RATE_LIMIT', '50/minute'))
 def get_statistics():
     """
     Get certificate transparency statistics.
@@ -307,7 +307,7 @@ def get_statistics():
 
 
 @api_bp.route('/search', methods=['GET'])
-@limiter.limit("50 per minute")
+@limiter.limit(lambda: current_app.config.get('CT_SEARCH_RATE_LIMIT', '50/minute'))
 def search_certificates():
     """
     Search certificates with flexible criteria.
